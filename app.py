@@ -195,65 +195,65 @@ class VideoProcessor(VideoProcessorBase):
 
         if results.multi_face_landmarks:
             for face_landmarks in results.multi_face_landmarks:
-                for idx, lm in enumerate(face_landmarks.landmark):
-                    if idx in [33, 263, 1, 61, 291, 199]:
-                        x, y = int(lm.x * img_w), int(lm.y * img_h)
-                        face_2d.append([x, y])
-                        face_3d.append([x, y, lm.z])
+                # for idx, lm in enumerate(face_landmarks.landmark):
+                #     if idx in [33, 263, 1, 61, 291, 199]:
+                #         x, y = int(lm.x * img_w), int(lm.y * img_h)
+                #         face_2d.append([x, y])
+                #         face_3d.append([x, y, lm.z])
 
-                # Convert to NumPy arrays
-                face_2d = np.array(face_2d, dtype=np.float64)
-                face_3d = np.array(face_3d, dtype=np.float64)
+                # # Convert to NumPy arrays
+                # face_2d = np.array(face_2d, dtype=np.float64)
+                # face_3d = np.array(face_3d, dtype=np.float64)
 
-                # Camera matrix and distortion parameters
-                focal_length = 1 * img_w
-                cam_matrix = np.array([[focal_length, 0, img_h / 2],
-                                       [0, focal_length, img_w / 2],
-                                       [0, 0, 1]])
-                dist_matrix = np.zeros((4, 1), dtype=np.float64)
+                # # Camera matrix and distortion parameters
+                # focal_length = 1 * img_w
+                # cam_matrix = np.array([[focal_length, 0, img_h / 2],
+                #                        [0, focal_length, img_w / 2],
+                #                        [0, 0, 1]])
+                # dist_matrix = np.zeros((4, 1), dtype=np.float64)
 
-                # Solve PnP
-                success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+                # # Solve PnP
+                # success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
 
-                # Get rotational matrix and angles
-                rmat, _ = cv2.Rodrigues(rot_vec)
-                angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
+                # # Get rotational matrix and angles
+                # rmat, _ = cv2.Rodrigues(rot_vec)
+                # angles, _, _, _, _, _ = cv2.RQDecomp3x3(rmat)
 
-                x = angles[0] * 360
-                y = angles[1] * 360
-                z = angles[2] * 360
+                # x = angles[0] * 360
+                # y = angles[1] * 360
+                # z = angles[2] * 360
 
-                # Determine head pose
-                if y < -10:
-                    text = "Looking Left"
-                elif y > 10:
-                    text = "Looking Right"
-                elif x < -10:
-                    text = "Looking Down"
-                elif x > 10:
-                    text = "Looking Up"
-                else:
-                    text = "Forward"
+                # # Determine head pose
+                # if y < -10:
+                #     text = "Looking Left"
+                # elif y > 10:
+                #     text = "Looking Right"
+                # elif x < -10:
+                #     text = "Looking Down"
+                # elif x > 10:
+                #     text = "Looking Up"
+                # else:
+                #     text = "Forward"
 
-                # Display the text on the image
-                cv2.putText(image, text, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
+                # # Display the text on the image
+                # cv2.putText(image, text, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 2)
                 # cv2.putText(image, "x: " + str(np.round(x, 2)), (500, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 # cv2.putText(image, "y: " + str(np.round(y, 2)), (500, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                 # cv2.putText(image, "z: " + str(np.round(z, 2)), (500, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-                # # Extract eye regions
-                # face_landmarks = landmark_detect(image, results)
-                # right_eye_corr = [face_landmarks[i] for i in RIGHT_EYE]
-                # left_eye_corr = [face_landmarks[i] for i in LEFT_EYE]
-                # cropped_right, cropped_left = eyes_extractor(image, right_eye_corr, left_eye_corr)
+                # Extract eye regions
+                face_landmarks = landmark_detect(image, results)
+                right_eye_corr = [face_landmarks[i] for i in RIGHT_EYE]
+                left_eye_corr = [face_landmarks[i] for i in LEFT_EYE]
+                cropped_right, cropped_left = eyes_extractor(image, right_eye_corr, left_eye_corr)
 
-                # # Estimate eye position
-                # eye_pos_right, color_right = pos_estimation(cropped_right)
-                # eye_pos_left, color_left = pos_estimation(cropped_left)
+                # Estimate eye position
+                eye_pos_right, color_right = pos_estimation(cropped_right)
+                eye_pos_left, color_left = pos_estimation(cropped_left)
 
-                # # Display eye position
-                # cv2.putText(image, f"Right Eye: {eye_pos_right}", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, color_right[0], 2)
-                # cv2.putText(image, f"Left Eye: {eye_pos_left}", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, color_left[0], 2)
+                # Display eye position
+                cv2.putText(image, f"Right Eye: {eye_pos_right}", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, color_right[0], 2)
+                cv2.putText(image, f"Left Eye: {eye_pos_left}", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, color_left[0], 2)
         
                 if num_faces > 1:
                     cv2.putText(image, f'Faces detected: {num_faces}', (20, img_h - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
