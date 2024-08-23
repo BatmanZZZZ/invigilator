@@ -203,44 +203,39 @@ def process_frame(frame):
 # Streamlit app
 st.title("Real-Time Eye Tracking")
 
-# Use a video file instead of the webcam
-video_file = st.file_uploader("Upload a video file", type=["mp4", "avi", "mov"])
+# Start video capture from the webcam
+cap = cv2.VideoCapture(0)
 
-if video_file is not None:
-    # Start video capture from the uploaded file
-    cap = cv2.VideoCapture(video_file.name)
+# Create a placeholder for the video feed
+frame_placeholder = st.empty()
 
-    # Create a placeholder for the video feed
-    frame_placeholder = st.empty()
+# Button state
+is_recording = False
 
-    # Button state
-    is_recording = False
+# Button to start/stop recording
+if st.button("Start/Stop Recording"):
+    is_recording = not is_recording  # Toggle the recording state
 
-    # Button to start/stop recording
-    if st.button("Start/Stop Recording"):
-        is_recording = not is_recording  # Toggle the recording state
+if is_recording:
+    while True:
+        success, frame = cap.read()
+        if not success:
+            st.error("Failed to capture video or end of video reached.")
+            break
 
-    if is_recording:
-        while True:
-            success, frame = cap.read()
-            if not success:
-                st.error("Failed to capture video or end of video reached.")
-                break
+        # Process the frame
+        processed_frame = process_frame(frame)
 
-            # Process the frame
-            processed_frame = process_frame(frame)
+        # Convert the frame to RGB for Streamlit
+        rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
 
-            # Convert the frame to RGB for Streamlit
-            rgb_frame = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
+        # Display the frame in the Streamlit app
+        frame_placeholder.image(rgb_frame, channels="RGB", use_column_width=True)
 
-            # Display the frame in the Streamlit app
-            frame_placeholder.image(rgb_frame, channels="RGB", use_column_width=True)
+        # Stop the loop if the user clicks the button again
+        if not is_recording:
+            frame_placeholder.empty()  # Clear the frame display
+            break
 
-            # Stop the loop if the user clicks the button again
-            if not is_recording:
-                frame_placeholder.empty()  # Clear the frame display
-                break
-
-    cap.release()
-else:
-    st.warning("Please upload a video file to start.")
+cap.release()
+st.balloons()
