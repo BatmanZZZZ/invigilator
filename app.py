@@ -255,10 +255,10 @@ class VideoProcessor(VideoProcessorBase):
                 cv2.putText(image, f"Right Eye: {eye_pos_right}", (20, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, color_right[0], 2)
                 cv2.putText(image, f"Left Eye: {eye_pos_left}", (20, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, color_left[0], 2)
         
-                if num_faces > 1:
-                    cv2.putText(image, f'Faces detected: {num_faces}', (20, img_h - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-                else:
-                    cv2.putText(image, f'Faces detected: {num_faces}', (20, img_h - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                # if num_faces > 1:
+                #     cv2.putText(image, f'Faces detected: {num_faces}', (20, img_h - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                # else:
+                #     cv2.putText(image, f'Faces detected: {num_faces}', (20, img_h - 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
         
         return image, num_faces
 
